@@ -18,8 +18,8 @@ def main_args():
     parser = ArgumentParser()
     parser.add_argument('--model', type=str, default='model1', help='model name.', required=True)
     parser.add_argument('--epochs', type=int, default=5, help='define number of training epochs')
-    parser.add_argument('--batch_size', type=int, default=32, help='define batch size')
-    parser.add_argument('--n_classes', type=int, default=10, help='number of classes; this should be same as the number of classes of the dataset you are using', required=True)
+    parser.add_argument('--batch_size', type=int, default=8, help='define batch size')
+    parser.add_argument('--n_classes', type=int, default=34, help='number of classes; this should be same as the number of classes of the dataset you are using', required=True)
     parser.add_argument('--dropout_rate', type=float, default=0.5, help='define dropout rate to use between fc layers')
 
     parser.add_argument('--input_shape', type=int, nargs='+', help='desired input shape to feed the model with')

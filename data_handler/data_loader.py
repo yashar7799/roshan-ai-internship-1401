@@ -13,7 +13,7 @@ class DataGenerator(Sequence):
     Should use data_creator module first, to download and create proper datasets.
     """
 
-    def __init__(self, list_IDs, labels, batch_size=32, dim=(256, 256), n_channels=1, n_classes=5, shuffle=True):
+    def __init__(self, list_IDs, labels, batch_size=8, dim=(120, 120), n_channels=4, n_classes=34, shuffle=True):
         'Initialization'
 
         self.dim = dim
