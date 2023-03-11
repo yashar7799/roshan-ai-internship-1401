@@ -54,7 +54,7 @@ def train():
                                    ngrok_auth_token=args.ngrok_auth_token)
     mlflow_handler.start_run(args)
 
-    data = DataCreator(n_classes = args.n_classes, src=args.source_dataset_dir, dst=args.dataset_dir_before_split)
+    data = DataCreator(src=args.source_dataset_dir, dst=args.dataset_dir_before_split)
     partition, labels = data.partitioning(partitioning_base_folder=args.dataset_dir_after_split)
 
     unique_labels = sorted(set(labels.values()), key=str)
