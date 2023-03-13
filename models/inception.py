@@ -11,8 +11,8 @@ class InceptionV3():
     """
 
     def __init__(self, 
-                 input_shape: Tuple[int, int, int] = (256, 256, 1),
-                 num_classes: int = 10,
+                 input_shape: Tuple[int, int, int] = (120, 120, 3),
+                 num_classes: int = 34,
                  pre_trained: bool = False,
                  model_path: str = None,
                  dropout: float = 0.4,

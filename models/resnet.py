@@ -15,8 +15,8 @@ class ResNet18():
     """
 
     def __init__(self, 
-                 input_shape: Tuple[int, int, int] = (256, 256, 1),
-                 num_classes: int = 10,
+                 input_shape: Tuple[int, int, int] = (120, 120, 3),
+                 num_classes: int = 34,
                  pre_trained: bool = False,
                  model_path: str = None):
         """
@@ -50,8 +50,8 @@ class ResNet50():
     """
 
     def __init__(self, 
-                 input_shape: Tuple[int, int, int] = (256, 256, 1),
-                 num_classes: int = 10,
+                 input_shape: Tuple[int, int, int] = (120, 120, 3),
+                 num_classes: int = 34,
                  pre_trained: bool = False,
                  model_path: str = None,
                  imagenet_weights:bool=False):
@@ -101,8 +101,8 @@ class ResNet50V2():
     """
 
     def __init__(self, 
-                 input_shape: Tuple[int, int, int] = (256, 256, 1),
-                 num_classes: int = 10,
+                 input_shape: Tuple[int, int, int] = (120, 120, 3),
+                 num_classes: int = 34,
                  pre_trained: bool = False,
                  model_path: str = None,
                  imagenet_weights:bool=False):
@@ -159,7 +159,7 @@ class ResNet50V2():
 
 
 class _Resnet18:
-    def __init__(self, image_size, n_classes=10):
+    def __init__(self, image_size, n_classes=34):
         self.input_shape = (image_size[0], image_size[1], image_size[2])
         self.n_classes = n_classes
 
@@ -234,6 +234,3 @@ class _Resnet18:
         outputs = resnet(inputs, [2, 2, 2, 2], self.n_classes)
         model = keras.Model(inputs, outputs)
         return model
-
-
-
