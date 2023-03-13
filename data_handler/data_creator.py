@@ -24,7 +24,7 @@ class DataCreator():
 
         shutil.copy(src=self.src, dst=self.dst)
 
-        shutil.unpack_archive(self.dst)
+        shutil.unpack_archive(self.dst, '..')
         print('data folder created successfully.\n')
 
     def partitioning(self, partitioning_base_folder:str = '../dataset', val_ratio:float = 0.15, test_ratio:float = 0.15, seed:float = None):
