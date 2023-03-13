@@ -24,17 +24,18 @@ class DataCreator():
 
     def create_data_folder(self):
         
-        shutil.rmtree(self.dst, ignore_errors=True)
+        shutil.rmtree(self.dst.split('.')[0], ignore_errors=True)
 
-        shutil.copytree(src=self.src, dst=self.dst)
+        shutil.copy(src=self.src, dst=self.dst)
 
+        shutil.unpack_archive(self.dst)
         print('data folder created successfully.\n')
 
     def partitioning(self, partitioning_base_folder:str = '../dataset', val_ratio:float = 0.15, test_ratio:float = 0.15, seed:float = None):
 
         shutil.rmtree(partitioning_base_folder, ignore_errors=True)
 
-        splitfolders.ratio(input=self.dst, output=partitioning_base_folder, ratio=(1-val_ratio-test_ratio, val_ratio, test_ratio), move=False, seed=seed)
+        splitfolders.ratio(input=self.dst.split('.')[0], output=partitioning_base_folder, ratio=(1-val_ratio-test_ratio, val_ratio, test_ratio), move=False, seed=seed)
 
         train_classes = sorted(os.listdir(os.path.join(partitioning_base_folder, 'train')))
         val_classes = sorted(os.listdir(os.path.join(partitioning_base_folder, 'val')))
