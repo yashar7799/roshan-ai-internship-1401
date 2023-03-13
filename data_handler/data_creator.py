@@ -18,10 +18,6 @@ class DataCreator():
         self.src = src
         self.dst = dst
 
-        classes = os.listdir(src)
-
-        self.classes = classes
-
     def create_data_folder(self):
         
         shutil.rmtree(self.dst.split('.')[0], ignore_errors=True)
@@ -44,10 +40,12 @@ class DataCreator():
         if not train_classes == val_classes == test_classes:
             raise FileNotFoundError('data is not completely ready!\ncheck that you run create_data_folder method correctly.')
 
+        classes = os.listdir(self.dst.split('.')[0])
+
         partition = {'train':[], 'val':[], 'test':[]}
         labels = {}
 
-        for cls in self.classes:
+        for cls in classes:
 
             train_files = np.array(glob(os.path.join(partitioning_base_folder, 'train', cls, '*')))
             val_files = np.array(glob(os.path.join(partitioning_base_folder, 'val', cls, '*')))
@@ -70,7 +68,7 @@ class DataCreator():
 
         print('Classes and train/val/test counts:\n')
         
-        for cls in self.classes:
+        for cls in classes:
 
             n_train = len(os.listdir(os.path.join(partitioning_base_folder, 'train', cls)))
             n_val = len(os.listdir(os.path.join(partitioning_base_folder, 'val', cls)))
