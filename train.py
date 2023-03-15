@@ -55,26 +55,22 @@ def train():
     mlflow_handler.start_run(args)
 
     data = DataCreator(src=args.source_dataset_dir, dst=args.dataset_dir_before_split)
-    partition, labels = data.partitioning(partitioning_base_folder=args.dataset_dir_after_split, val_ratio=args.val_ratio, test_ratio=args.test_ratio)
+    partition, labels, encoded_classes_dict = data.partitioning(partitioning_base_folder=args.dataset_dir_after_split, val_ratio=args.val_ratio, test_ratio=args.test_ratio)
 
-    unique_labels = sorted(set(labels.values()), key=str)
-    unique_indexes = [idx for idx,_ in enumerate(unique_labels)]
-    index_labels = {}
-    index_classes = {cls:idx for idx,cls in enumerate(unique_labels)}
-    for key in labels:
-        index_labels[key] = index_classes[labels[key]]
+    unique_classes = list(encoded_classes_dict.keys())
+    encoded_unique_classes = list(encoded_classes_dict.values())
 
-    report = list(index_classes.items())
+    report = list(encoded_classes_dict.items())
     mlflow_handler.add_report(str(report), 'logs/class&index_pairs.txt')
 
-    mlflow_handler.add_report(str(unique_labels), 'logs/classes.txt')
+    mlflow_handler.add_report(str(unique_classes), 'logs/classes.txt')
 
-    print(f'classes are: {unique_labels}\n')
+    print(f'classes are: {unique_classes}\n')
     print(f'(class, index) pairs are: {report}\n')
 
-    train_loader = DataGenerator(partition['train'], labels=index_labels, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes)
-    val_loader = DataGenerator(partition['val'], labels=index_labels, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes)
-    test_loader = DataGenerator(partition['test'], labels=index_labels, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes)
+    train_loader = DataGenerator(partition['train'], labels=labels, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes)
+    val_loader = DataGenerator(partition['val'], labels=labels, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes)
+    test_loader = DataGenerator(partition['test'], labels=labels, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes)
     
     if args.model == 'model1':
         model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, dropout=args.dropout_rate)
@@ -138,7 +134,7 @@ def train():
 
     print("Training Model is Done!\n")
 
-    get_logs(model, test_loader, unique_indexes, unique_labels, mlflow_handler)
+    get_logs(model, test_loader, encoded_unique_classes, unique_classes, mlflow_handler)
     mlflow_handler.end_run(weight_path)
 
 
