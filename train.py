@@ -55,7 +55,7 @@ def train():
     mlflow_handler.start_run(args)
 
     data = DataCreator(src=args.source_dataset_dir, dst=args.dataset_dir_before_split)
-    partition, labels, encoded_classes_dict = data.partitioning(partitioning_base_folder=args.dataset_dir_after_split, val_ratio=args.val_ratio, test_ratio=args.test_ratio)
+    partition, labels, encoded_classes_dict = data.partitioning_0(partitioning_base_folder=args.dataset_dir_after_split, val_ratio=args.val_ratio, test_ratio=args.test_ratio)
 
     unique_classes = list(encoded_classes_dict.keys())
     encoded_unique_classes = list(encoded_classes_dict.values())

@@ -36,7 +36,7 @@ def main_args():
 
     parser.add_argument('--dataset_dir_after_split', type=str, default='../dataset', help='dataset directory, this directory should contain train, val & test folders', required=True)
     parser.add_argument('--dataset_dir_before_split', type=str, default='/content/roshan_internship_dataset_png', help='dataset directory, this directory should contain all images before splitting', required=True)
-    parser.add_argument('--source_dataset_dir', type=str, default='/content/drive/MyDrive/roshan_internship_dataset_png', help='dataset directory, this directory should contain all images in a source, like google drive folder', required=False)
+    parser.add_argument('--source_dataset_dir', type=str, default='/content/drive/MyDrive/roshan_internship_dataset_jpg.zip', help='dataset directory, this directory should contain all images in a source, like google drive folder', required=False)
 
     parser.add_argument('--mlflow_source', type=str, default='./mlruns', help='The mlflow direcotry')
     parser.add_argument('--run_ngrok', dest='run_ngrok', action='store_true', help="pass this arg if you want to run train.py in colab!")
