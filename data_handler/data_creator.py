@@ -31,7 +31,7 @@ class DataCreator():
 
         os.makedirs(self.dst.split('.')[0], exist_ok=True)
 
-        shutil.unpack_archive(self.dst, self.dst.split('.')[0])
+        shutil.unpack_archive(self.dst, '..')
 
         print('data folder created successfully.\n')
 
