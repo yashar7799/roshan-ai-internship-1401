@@ -35,15 +35,11 @@ class DataCreator():
 
         raw_classes = os.listdir(self.dst.split('.')[0])
 
-        global le
         le = LabelEncoder()
         le.fit(raw_classes)
-        global classes
         classes = list(le.classes_)
-        global encoded_classes
         encoded_classes = list(le.transform(classes))
 
-        global encoded_classes_dict
         encoded_classes_dict = {}
         
         for cls, encoded_cls in zip(classes, encoded_classes):
@@ -51,6 +47,10 @@ class DataCreator():
             os.rename(os.path.join(self.dst.split('.')[0], cls), os.path.join(self.dst.split('.')[0], str(encoded_cls)))
 
         print('data folder created successfully.\n')
+
+        self.le = le
+        self.encoded_classes = encoded_classes
+        self.encoded_classes_dict = encoded_classes_dict
 
     def partitioning_0(self, partitioning_base_folder:str = '../dataset', val_ratio:float = 0.15, test_ratio:float = 0.15, seed:float = None):
 
@@ -68,7 +68,7 @@ class DataCreator():
         partition = {'train':[], 'val':[], 'test':[]}
         labels = {}
 
-        for encoded_cls in encoded_classes:
+        for encoded_cls in self.encoded_classes:
 
             train_files = np.array(glob(os.path.join(partitioning_base_folder, 'train', str(encoded_cls), '*')))
             val_files = np.array(glob(os.path.join(partitioning_base_folder, 'val', str(encoded_cls), '*')))
@@ -90,17 +90,17 @@ class DataCreator():
 
         print('Classes and train/val/test counts:\n')
         
-        for encoded_cls in encoded_classes:
+        for encoded_cls in self.encoded_classes:
 
             n_train = len(os.listdir(os.path.join(partitioning_base_folder, 'train', str(encoded_cls))))
             n_val = len(os.listdir(os.path.join(partitioning_base_folder, 'val', str(encoded_cls))))
             n_test = len(os.listdir(os.path.join(partitioning_base_folder, 'test', str(encoded_cls))))
 
-            print(f'{le.inverse_transform([encoded_cls])[0]} >>> train: {n_train} | val: {n_val} | test: {n_test}')
+            print(f'{self.le.inverse_transform([encoded_cls])[0]} >>> train: {n_train} | val: {n_val} | test: {n_test}')
 
         print('\n')
 
-        return partition, labels, encoded_classes_dict
+        return partition, labels, self.encoded_classes_dict
 
     def create_data_folder(self):
         
