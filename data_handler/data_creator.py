@@ -1,8 +1,11 @@
 import shutil
 import numpy as np
+import pandas as pd
 import os
 from glob import glob
 import splitfolders
+import tarfile
+
 
 
 class DataCreator():
@@ -20,18 +23,46 @@ class DataCreator():
 
     def create_data_folder(self):
         
-        shutil.rmtree(self.dst.split('.')[0], ignore_errors=True)
+        shutil.rmtree(self.dst, ignore_errors=True)
+        os.makedirs(self.dst, exist_ok=True)
 
-        shutil.copy(src=self.src, dst=self.dst)
+        shutil.copy(src=os.path.join(self.src, 'ordibehesht_10K.tar.gz'), dst=self.dst)
+        shutil.copy(src=os.path.join(self.src, 'ordibehesht.csv.tar.gz'), dst=self.dst)
 
-        shutil.unpack_archive(self.dst, '..')
+        data_file = tarfile.open(os.path.join(self.dst, 'ordibehesht_10K.tar.gz'))
+        data_file.extractall(self.dst)
+        data_file.close()
+
+        metadata_file = tarfile.open(os.path.join(self.dst, 'ordibehesht.csv.tar.gz'))
+        metadata_file.extractall(self.dst)
+        metadata_file.close()
+
+        metadata = pd.read_csv('/content/ordibehesht.csv')
+        metadata.dropna(inplace=True)
+
+        image_names = os.listdir(os.path.join(self.dst, 'ordibehesht_images_10000'))
+
+        for image_dir, labels_list in metadata.itertuples(index=False, name=None):
+            labels_list = labels_list.replace('"', '').replace(']', '').replace('[', '').split(',')
+            if 'true' in labels_list:
+                label = labels_list[labels_list.index('true') - 1]
+
+            image_name = image_dir.split('/')[-1]
+            if image_name in image_names:
+                os.makedirs(os.path.join(self.dst, 'dataset', label), exist_ok=True)
+                shutil.move(src=os.path.join(self.dst, 'ordibehesht_images_10000', image_name), dst=os.path.join(self.dst, 'dataset', label))
+                image_names.remove(image_name)
+
+            if len(image_names) == 0:
+                break
+
         print('data folder created successfully.\n')
 
     def partitioning(self, partitioning_base_folder:str = '../dataset', val_ratio:float = 0.15, test_ratio:float = 0.15, seed:float = None):
 
         shutil.rmtree(partitioning_base_folder, ignore_errors=True)
 
-        splitfolders.ratio(input=self.dst.split('.')[0], output=partitioning_base_folder, ratio=(1-val_ratio-test_ratio, val_ratio, test_ratio), move=False, seed=seed)
+        splitfolders.ratio(input=os.path.join(self.dst, 'dataset'), output=partitioning_base_folder, ratio=(1-val_ratio-test_ratio, val_ratio, test_ratio), move=False, seed=seed)
 
         train_classes = sorted(os.listdir(os.path.join(partitioning_base_folder, 'train')))
         val_classes = sorted(os.listdir(os.path.join(partitioning_base_folder, 'val')))
@@ -40,7 +71,7 @@ class DataCreator():
         if not train_classes == val_classes == test_classes:
             raise FileNotFoundError('data is not completely ready!\ncheck that you run create_data_folder method correctly.')
 
-        classes = os.listdir(self.dst.split('.')[0])
+        classes = os.listdir(os.path.join(self.dst, 'dataset'))
 
         partition = {'train':[], 'val':[], 'test':[]}
         labels = {}
