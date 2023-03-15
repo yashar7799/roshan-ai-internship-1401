@@ -33,24 +33,28 @@ class DataCreator():
 
         shutil.unpack_archive(self.dst, '..')
 
+        raw_classes = os.listdir(self.dst.split('.')[0])
+
+        global le
+        le = LabelEncoder()
+        le.fit(raw_classes)
+        global classes
+        classes = list(le.classes_)
+        global encoded_classes
+        encoded_classes = list(le.transform(classes))
+
+        global encoded_classes_dict
+        encoded_classes_dict = {}
+        
+        for cls, encoded_cls in zip(classes, encoded_classes):
+            encoded_classes_dict[cls] = encoded_cls
+            os.rename(os.path.join(self.dst.split('.')[0], cls), os.path.join(self.dst.split('.')[0], str(encoded_cls)))
+
         print('data folder created successfully.\n')
 
     def partitioning_0(self, partitioning_base_folder:str = '../dataset', val_ratio:float = 0.15, test_ratio:float = 0.15, seed:float = None):
 
         shutil.rmtree(partitioning_base_folder, ignore_errors=True)
-
-        classes = os.listdir(self.dst.split('.')[0])
-
-        le = LabelEncoder()
-        le.fit(classes)
-        classes = list(le.classes_)
-        encoded_classes = list(le.transform(classes))
-
-        encoded_classes_dict = {}
-
-        for cls, encoded_cls in zip(classes, encoded_classes):
-            encoded_classes_dict[cls] = encoded_cls
-            os.rename(os.path.join(self.dst.split('.')[0], cls), os.path.join(self.dst.split('.')[0], str(encoded_cls)))
 
         splitfolders.ratio(input=self.dst.split('.')[0], output=partitioning_base_folder, ratio=(1-val_ratio-test_ratio, val_ratio, test_ratio), move=False, seed=seed)
 
@@ -60,8 +64,6 @@ class DataCreator():
 
         if not train_classes == val_classes == test_classes:
             raise FileNotFoundError('data is not completely ready!\ncheck that you run create_data_folder method correctly.')
-
-        
 
         partition = {'train':[], 'val':[], 'test':[]}
         labels = {}
@@ -83,7 +85,6 @@ class DataCreator():
             for test in test_files:
                 partition['test'].append(test)
                 labels[test] = encoded_cls
-
 
         # print out train/val/test counts:
 
