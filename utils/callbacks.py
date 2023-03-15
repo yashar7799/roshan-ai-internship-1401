@@ -9,7 +9,7 @@ from datetime import datetime
 
 def get_callbacks(model_path,
                   early_stopping_patience,
-                  tb_log_dir,
+                #   tb_log_dir,
                   plateau_reduce_min_lr,
                   plateau_reduce_factor,
                   plateau_reduce_patience,
@@ -18,8 +18,8 @@ def get_callbacks(model_path,
                   batch_size,
                   warmup_max_lr,
                   sample_count,
-                  model_name,
-                  n_classes,
+                #   model_name,
+                #   n_classes,
                   **kwargs):
     """
     This function use some callbacks from tensorflow.python.keras.callbacks
@@ -70,9 +70,9 @@ def get_callbacks(model_path,
 
     early_stopping = EarlyStopping(monitor="val_loss", patience=early_stopping_patience, verbose=1)
 
-    tensorboard = TensorBoard(log_dir=tb_log_dir + '/' + model_name + '{}classes__{}'.format(str(n_classes), str(datetime.now()).replace(':', '_').replace(' ','_')),
-                              histogram_freq=0,
-                              write_graph=True,
-                              write_images=True)
+    # tensorboard = TensorBoard(log_dir=tb_log_dir + '/' + model_name + '{}classes__{}'.format(str(n_classes), str(datetime.now()).replace(':', '_').replace(' ','_')),
+    #                           histogram_freq=0,
+    #                           write_graph=True,
+    #                           write_images=True)
 
-    return checkpoint, warmup_lr, early_stopping, tensorboard, plateau_reduce_lr
+    return checkpoint, warmup_lr, early_stopping, plateau_reduce_lr#, tensorboard

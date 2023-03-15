@@ -89,21 +89,21 @@ def train():
         print('pretrain weights loaded.\n')
     model.summary()
 
-    checkpoint, warmup_lr, early_stopping, tensorboard, plateau_reduce_lr = get_callbacks(model_path=weight_path,
+    checkpoint, warmup_lr, early_stopping, plateau_reduce_lr = get_callbacks(model_path=weight_path,
                                                                                early_stopping_patience=args.early_stopping_patience,
-                                                                               tb_log_dir=args.tb_log_dir,
+                                                                            #    tb_log_dir=args.tb_log_dir,
                                                                                epochs=args.epochs,
                                                                                sample_count=len(train_loader) * args.batch_size,
                                                                                batch_size=args.batch_size,
                                                                                warmup_epoch=args.warmup_epoch,
                                                                                warmup_max_lr=args.warmup_max_lr,
-                                                                               model_name=model_name,
-                                                                               n_classes=args.n_classes,
+                                                                            #    model_name=model_name,
+                                                                            #    n_classes=args.n_classes,
                                                                                plateau_reduce_min_lr=args.plateau_reduce_min_lr,
                                                                                plateau_reduce_factor=args.plateau_reduce_factor,
                                                                                plateau_reduce_patience=args.plateau_reduce_patience)
     
-    callbacks = [tensorboard, checkpoint, early_stopping, mlflow_handler.mlflow_logger]
+    callbacks = [checkpoint, early_stopping, mlflow_handler.mlflow_logger]
     
     if args.warmup_lr_scheduler:
         callbacks.append(warmup_lr)
