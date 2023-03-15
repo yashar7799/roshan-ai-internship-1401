@@ -95,7 +95,7 @@ class DataCreator():
             n_val = len(os.listdir(os.path.join(partitioning_base_folder, 'val', str(encoded_cls))))
             n_test = len(os.listdir(os.path.join(partitioning_base_folder, 'test', str(encoded_cls))))
 
-            print(f'{le.inverse_transform(list(encoded_cls))[0]} >>> train: {n_train} | val: {n_val} | test: {n_test}')
+            print(f'{le.inverse_transform([encoded_cls])[0]} >>> train: {n_train} | val: {n_val} | test: {n_test}')
 
         print('\n')
 
