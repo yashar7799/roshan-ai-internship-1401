@@ -89,13 +89,13 @@ class DataCreator():
 
         print('Classes and train/val/test counts:\n')
         
-        for cls in classes:
+        for encoded_cls in encoded_classes:
 
-            n_train = len(os.listdir(os.path.join(partitioning_base_folder, 'train', cls)))
-            n_val = len(os.listdir(os.path.join(partitioning_base_folder, 'val', cls)))
-            n_test = len(os.listdir(os.path.join(partitioning_base_folder, 'test', cls)))
+            n_train = len(os.listdir(os.path.join(partitioning_base_folder, 'train', str(encoded_cls))))
+            n_val = len(os.listdir(os.path.join(partitioning_base_folder, 'val', str(encoded_cls))))
+            n_test = len(os.listdir(os.path.join(partitioning_base_folder, 'test', str(encoded_cls))))
 
-            print(f'{cls} >>> train: {n_train} | val: {n_val} | test: {n_test}')
+            print(f'{le.inverse_transform(list(encoded_cls))[0]} >>> train: {n_train} | val: {n_val} | test: {n_test}')
 
         print('\n')
 
