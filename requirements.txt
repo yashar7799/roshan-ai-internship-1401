@@ -11,3 +11,4 @@ gdown
 pyngrok
 mlflow>=1.20.2
 split-folders[full]
+albumentations
