@@ -13,7 +13,7 @@ class DataGenerator(Sequence):
     Should use data_creator module first, to download and create proper datasets.
     """
 
-    def __init__(self, list_IDs, labels, batch_size=8, dim=(120, 120), n_channels=4, n_classes=34, shuffle=True):
+    def __init__(self, list_IDs, labels, encoded_classes_dict, batch_size=16, dim=(120, 120), n_channels=3, n_classes=250, shuffle=True):
         'Initialization'
 
         self.dim = dim
@@ -21,6 +21,7 @@ class DataGenerator(Sequence):
         self.batch_size = batch_size
         self.labels = labels
         self.list_IDs = list_IDs
+        self.encoded_classes_dict = encoded_classes_dict
         self.n_classes = n_classes
         self.shuffle = shuffle
         self.on_epoch_end()
@@ -81,6 +82,6 @@ class DataGenerator(Sequence):
             X[i,] = self.preprocess_image(ID)
 
             # Store class
-            y[i] = self.labels[ID]
+            y[i] = self.encoded_classes_dict[self.labels[ID]]
 
         return X, to_categorical(y, num_classes=self.n_classes)
