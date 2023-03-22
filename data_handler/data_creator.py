@@ -189,6 +189,7 @@ class DataCreator():
                 partition['test'].append(test)
                 labels[test] = cls
 
+        print(f'Number of classes: {len(self.classes)}\n')
 
         # print out train/val/test counts:
 
