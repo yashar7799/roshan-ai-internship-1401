@@ -120,8 +120,12 @@ def train():
     else:
         opt = Adam(learning_rate=args.learning_rate)
         print(f'none of lr_schedulers  activated, learning rate fixed at: {args.learning_rate}\n')
+    
+    if args.loss == 'huber':
+        loss = tf.keras.losses.Huber()
+    else:
+        loss = args.loss
 
-    loss = tf.keras.losses.Huber()
     model.compile(optimizer=opt, loss=loss, metrics=['acc'])
     model.fit(x=train_loader,
               batch_size=args.batch_size,
