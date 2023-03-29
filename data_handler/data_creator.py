@@ -162,7 +162,7 @@ class DataCreator():
             encoded_classes_dict[cls] = encoded_cls
 
         # remove no needed classes:
-        no_needed_classes = all_classes - needed_classes
+        no_needed_classes = list(set(all_classes).difference(set(needed_classes)))
         for cls in no_needed_classes:
             shutil.rmtree(os.path.join(self.dst, 'dataset', cls), ignore_errors=True)
 
