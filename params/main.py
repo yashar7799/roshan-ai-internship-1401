@@ -21,7 +21,10 @@ def main_args():
     parser.add_argument('--batch_size', type=int, default=8, help='define batch size')
     parser.add_argument('--n_classes', type=int, default=34, help='number of classes; this should be same as the number of classes of the dataset you are using', required=True)
     parser.add_argument('--dropout_rate', type=float, default=0.5, help='define dropout rate to use between fc layers')
-    parser.add_argument('--loss', type=str, default='categorical_crossentropy', help='You can pass these losses: categorical_crossentropy | sparse_categorical_crossentropy | kullback_leibler_divergence | huber')
+    parser.add_argument('--loss', type=str, default='categorical_crossentropy', help='You can pass these losses: categorical_crossentropy | kullback_leibler_divergence | huber')
+
+    parser.add_argument('--in_kaggle', dest='in_kaggle', action='store_true', help="pass this arg if you are running train.py in kaggle")
+    parser.add_argument('--not_in_kaggle', dest='in_kaggle', action='store_false', help="pass this arg if you are running train.py everywhere but kaggle")
 
     parser.add_argument('--val_ratio', type=float, default=0.15, help='validation ratio to be devided from dataset')
     parser.add_argument('--test_ratio', type=float, default=0.15, help='test ratio to be devided from dataset')
@@ -35,9 +38,10 @@ def main_args():
 
     parser.add_argument('--weights_base_folder', type=str, default='./weights', help='this is the base folder that all the weights will be saved there')
 
-    parser.add_argument('--dataset_dir_after_split', type=str, default='../dataset', help='dataset directory, this directory should contain train, val & test folders', required=True)
+    parser.add_argument('--path_to_images_file', type=str, default='/content/drive/MyDrive/roshan_internship_dataset_jpg.zip', help='dataset directory, this directory should contain all images in a source, like google drive folder', required=False)
+    parser.add_argument('--path_to_metadata_csv_file', type=str, default='/content/drive/MyDrive/roshan_internship_dataset_jpg.zip', help='dataset directory, this directory should contain all images in a source, like google drive folder', required=False)
     parser.add_argument('--dataset_dir_before_split', type=str, default='/content/roshan_internship_dataset_png', help='dataset directory, this directory should contain all images before splitting', required=True)
-    parser.add_argument('--source_dataset_dir', type=str, default='/content/drive/MyDrive/roshan_internship_dataset_jpg.zip', help='dataset directory, this directory should contain all images in a source, like google drive folder', required=False)
+    parser.add_argument('--dataset_dir_after_split', type=str, default='../dataset', help='dataset directory, this directory should contain train, val & test folders', required=True)
 
     parser.add_argument('--mlflow_source', type=str, default='./mlruns', help='The mlflow direcotry')
     parser.add_argument('--run_ngrok', dest='run_ngrok', action='store_true', help="pass this arg if you want to run train.py in colab!")

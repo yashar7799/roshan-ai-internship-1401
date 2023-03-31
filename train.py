@@ -54,8 +54,8 @@ def train():
                                    ngrok_auth_token=args.ngrok_auth_token)
     mlflow_handler.start_run(args)
 
-    data = DataCreator(src=args.source_dataset_dir, dst=args.dataset_dir_before_split)
-    data.create_data_folder(n_classes=args.n_classes)
+    data = DataCreator(path_to_images_file=args.path_to_images_file, path_to_metadata_csv_file=args.path_to_metadata_csv_file, dst=args.dataset_dir_before_split)
+    data.create_data_folder(n_classes=args.n_classes, in_kaggle=args.in_kaggle)
     partition, labels, encoded_classes_dict = data.partitioning(partitioning_base_folder=args.dataset_dir_after_split, val_ratio=args.val_ratio, test_ratio=args.test_ratio)
 
     unique_classes = list(encoded_classes_dict.keys())
