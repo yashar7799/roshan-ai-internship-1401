@@ -29,7 +29,7 @@ class DataCreator():
         os.makedirs(self.dst, exist_ok=True)
 
         if in_kaggle:
-            _ = shutil.copytree(src=self.path_to_images_file, dst=self.dst, copy_function=shutil.copy)
+            _ = shutil.copytree(src=self.path_to_images_file, dst=self.dst, copy_function=shutil.copy, dirs_exist_ok=True)
         else:
             shutil.copytree(src=self.path_to_images_file, dst=self.dst)
             shutil.unpack_archive(os.path.join(self.dst, self.path_to_images_file.split('/')[-1]), self.dst)
