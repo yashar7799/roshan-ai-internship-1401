@@ -17,20 +17,18 @@ def main_args():
     """
     parser = ArgumentParser()
     parser.add_argument('--model', type=str, default='model1', help='model name.', required=True)
-    parser.add_argument('--epochs', type=int, default=5, help='define number of training epochs')
+    parser.add_argument('--input_shape', type=int, nargs='+', help='desired input shape to feed the model with')
+    parser.add_argument('--n_classes', type=int, default=30, help='number of classes; this should be same as the number of classes of the dataset you are using', required=True)
     parser.add_argument('--batch_size', type=int, default=8, help='define batch size')
-    parser.add_argument('--n_classes', type=int, default=34, help='number of classes; this should be same as the number of classes of the dataset you are using', required=True)
     parser.add_argument('--dropout_rate', type=float, default=0.5, help='define dropout rate to use between fc layers')
     parser.add_argument('--loss', type=str, default='categorical_crossentropy', help='You can pass these losses: categorical_crossentropy | kullback_leibler_divergence | huber')
+    parser.add_argument('--epochs', type=int, default=5, help='define number of training epochs')
 
     parser.add_argument('--in_kaggle', dest='in_kaggle', action='store_true', help="pass this arg if you are running train.py in kaggle")
     parser.add_argument('--not_in_kaggle', dest='in_kaggle', action='store_false', help="pass this arg if you are running train.py everywhere but kaggle")
 
     parser.add_argument('--val_ratio', type=float, default=0.15, help='validation ratio to be devided from dataset')
     parser.add_argument('--test_ratio', type=float, default=0.15, help='test ratio to be devided from dataset')
-
-
-    parser.add_argument('--input_shape', type=int, nargs='+', help='desired input shape to feed the model with')
 
     parser.add_argument('--pretrain', dest='pretrain', action='store_true', help='pass this arg if you want to load weights of a pretrained model.')
     parser.add_argument('--path_to_pretrain', type=str, default=None, help='path to a pretrained model weights - .h5 file')

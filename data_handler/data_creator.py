@@ -73,8 +73,21 @@ class DataCreator():
 
         needed_classes = list(len_of_needed_classes_dict.keys())
 
+        # remove no needed classes:
+        no_needed_classes = list(set(all_classes).difference(set(needed_classes)))
+        for cls in no_needed_classes:
+            shutil.rmtree(os.path.join(self.dst, 'dataset', cls), ignore_errors=True)
+
+        print('data folder created successfully.\n')
+
+    def partitioning(self, partitioning_base_folder:str = '../dataset', val_ratio:float = 0.15, test_ratio:float = 0.15, seed:float = None):
+
+        shutil.rmtree(partitioning_base_folder, ignore_errors=True)
+
+        classes = os.listdir(os.path.join(self.dst, 'dataset'))
+
         le = LabelEncoder()
-        le.fit(needed_classes)
+        le.fit(classes)
         classes = list(le.classes_)
         encoded_classes = list(le.transform(classes))
 
@@ -82,21 +95,6 @@ class DataCreator():
         
         for cls, encoded_cls in zip(classes, encoded_classes):
             encoded_classes_dict[cls] = encoded_cls
-
-        # remove no needed classes:
-        no_needed_classes = list(set(all_classes).difference(set(needed_classes)))
-        for cls in no_needed_classes:
-            shutil.rmtree(os.path.join(self.dst, 'dataset', cls), ignore_errors=True)
-
-
-        print('data folder created successfully.\n')
-
-        self.classes = classes
-        self.encoded_classes_dict = encoded_classes_dict
-
-    def partitioning(self, partitioning_base_folder:str = '../dataset', val_ratio:float = 0.15, test_ratio:float = 0.15, seed:float = None):
-
-        shutil.rmtree(partitioning_base_folder, ignore_errors=True)
 
         splitfolders.ratio(input=os.path.join(self.dst, 'dataset'), output=partitioning_base_folder, ratio=(1-val_ratio-test_ratio, val_ratio, test_ratio), move=False, seed=seed)
 
@@ -110,7 +108,7 @@ class DataCreator():
         partition = {'train':[], 'val':[], 'test':[]}
         labels = {}
 
-        for cls in self.classes:
+        for cls in classes:
 
             train_files = np.array(glob(os.path.join(partitioning_base_folder, 'train', cls, '*')))
             val_files = np.array(glob(os.path.join(partitioning_base_folder, 'val', cls, '*')))
@@ -128,13 +126,13 @@ class DataCreator():
                 partition['test'].append(test)
                 labels[test] = cls
 
-        print(f'Number of classes: {len(self.classes)}\n')
+        print(f'Number of classes: {len(classes)}\n')
 
         # print out train/val/test counts:
 
         print('Classes and train/val/test counts:\n')
         
-        for cls in self.classes:
+        for cls in classes:
 
             n_train = len(os.listdir(os.path.join(partitioning_base_folder, 'train', cls)))
             n_val = len(os.listdir(os.path.join(partitioning_base_folder, 'val', cls)))
@@ -147,4 +145,4 @@ class DataCreator():
 
         print('\n')
 
-        return partition, labels, self.encoded_classes_dict
+        return partition, labels, encoded_classes_dict
