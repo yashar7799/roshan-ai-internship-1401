@@ -24,9 +24,6 @@ def main_args():
     parser.add_argument('--loss', type=str, default='categorical_crossentropy', help='You can pass these losses: categorical_crossentropy | kullback_leibler_divergence | huber')
     parser.add_argument('--epochs', type=int, default=5, help='define number of training epochs')
 
-    parser.add_argument('--in_kaggle', dest='in_kaggle', action='store_true', help="pass this arg if you are running train.py in kaggle")
-    parser.add_argument('--not_in_kaggle', dest='in_kaggle', action='store_false', help="pass this arg if you are running train.py everywhere but kaggle")
-
     parser.add_argument('--val_ratio', type=float, default=0.15, help='validation ratio to be devided from dataset')
     parser.add_argument('--test_ratio', type=float, default=0.15, help='test ratio to be devided from dataset')
 
@@ -47,7 +44,7 @@ def main_args():
     parser.add_argument('--ngrok_auth_token', type=str, help='an authentication token that ngrok gives it to you')
 
     parser.add_argument('--augmentation', dest='augmentation', action='store_true', help='pass this arg if you want augmentations')
-    parser.add_argument('--augmentation_p', type=float, default=0.5, help='augmentation probability')
+    parser.add_argument('--augmentation_prob', type=float, default=0.5, help='augmentation probability')
 
     parser.add_argument('--multiprocessing', dest='multiprocessing', action='store_true', help="Run model.fit with multi-processing")
     parser.add_argument('--no_multiprocessing', dest='multiprocessing', action='store_false', help="Run model.fit without multi-processing")

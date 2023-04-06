@@ -68,8 +68,8 @@ def train():
     print(f'classes are: {unique_classes}\n')
     print(f'(class, index) pairs are: {report}\n')
 
-    train_loader = DataGenerator(partition['train'], labels, encoded_classes_dict, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes)
-    val_loader = DataGenerator(partition['val'], labels, encoded_classes_dict, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes)
+    train_loader = DataGenerator(partition['train'], labels, encoded_classes_dict, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes, augmentation=args.augmentation, augmentation_prob=args.augmentation_prob)
+    val_loader = DataGenerator(partition['val'], labels, encoded_classes_dict, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes, augmentation=args.augmentation, augmentation_prob=args.augmentation_prob)
     test_loader = DataGenerator(partition['test'], labels, encoded_classes_dict, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes)
     
     if args.model == 'model1':

@@ -4,8 +4,13 @@ from tensorflow.keras.utils import Sequence
 from tensorflow.keras.preprocessing.image import img_to_array, smart_resize
 from tensorflow import image as im
 from PIL import Image
-
-
+from albumentations import (
+    RandomBrightness, RandomContrast, Sharpen, Emboss, PiecewiseAffine, CLAHE,
+    ShiftScaleRotate, Blur, OpticalDistortion, GridDistortion, HueSaturationValue,
+    GaussNoise, MotionBlur, MedianBlur, Flip, OneOf, Compose, ElasticTransform, HorizontalFlip,
+    RandomRotate90, Transpose, IAAAdditiveGaussianNoise, IAAPiecewiseAffine, IAASharpen, IAAEmboss,
+    RandomBrightnessContrast
+    )
 class DataGenerator(Sequence):
 
     """
@@ -13,7 +18,7 @@ class DataGenerator(Sequence):
     Should use data_creator module first, to download and create proper datasets.
     """
 
-    def __init__(self, list_IDs, labels, encoded_classes_dict, batch_size=16, dim=(120, 120), n_channels=3, n_classes=250, shuffle=True):
+    def __init__(self, list_IDs, labels, encoded_classes_dict, batch_size=16, dim=(120, 120), n_channels=3, n_classes=250, shuffle=True, augmentation=False, augmentation_prob=0.5):
         'Initialization'
 
         self.dim = dim
@@ -25,6 +30,8 @@ class DataGenerator(Sequence):
         self.n_classes = n_classes
         self.shuffle = shuffle
         self.on_epoch_end()
+        self.augmentation = augmentation
+        self.augmentation_prob = augmentation_prob
  
     def __len__(self):
         'Denotes the number of batches per epoch'
@@ -49,7 +56,13 @@ class DataGenerator(Sequence):
         if self.shuffle == True:
             np.random.shuffle(self.indexes)
 
-    def preprocess_image(self, image_path):
+    def open_image(self, image_path):
+        image = Image.open(image_path)
+        image = img_to_array(image, dtype='float32')
+
+        return image
+
+    def preprocess_image(self, image_array):
         """
         Parameters
         ----------
@@ -59,12 +72,36 @@ class DataGenerator(Sequence):
         -------
         preprocessed image ready for learning and prediction.
         """
-        # array = ((array - array.min()) * (1/(array.max() - array.min()) * 255)).astype('uint8')
-        image = Image.open(image_path)
-        image = img_to_array(image)
-        image = smart_resize(image, self.dim)
+
+        image = smart_resize(image_array, self.dim)
         image = im.per_image_standardization(image)
+
         return image
+
+    def augmentation_func(self, p=0.5):
+        return Compose([
+                    RandomRotate90(),
+                    Flip(),
+                    Transpose(),
+                    GaussNoise(),
+                    OneOf([
+                        MotionBlur(p=.2),
+                        MedianBlur(blur_limit=3, p=0.1),
+                        Blur(blur_limit=3, p=0.1),
+                    ], p=0.2),
+                    ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.2, rotate_limit=45, p=0.2),
+                    OneOf([
+                        OpticalDistortion(p=0.3),
+                        GridDistortion(p=.1),
+                        PiecewiseAffine(p=0.3),
+                    ], p=0.2),
+                    OneOf([
+                        Sharpen(),
+                        Emboss(),
+                        RandomBrightnessContrast(),            
+                    ], p=0.3),
+                    HueSaturationValue(p=0.3),
+                ], p=p)
 
     def __data_generation(self, list_IDs_temp):
         'Generates data containing batch_size samples' # X : (n_samples, *dim, n_channels)
@@ -79,7 +116,11 @@ class DataGenerator(Sequence):
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             # Store sample
-            X[i,] = self.preprocess_image(ID)
+            image = self.open_image(ID)
+            if self.augmentation:
+                transform = self.augmentation_func(p=self.augmentation_prob)
+                image = transform(image=image)['image']
+            X[i,] = self.preprocess_image(image)
 
             # Store class
             y[i] = self.encoded_classes_dict[self.labels[ID]]

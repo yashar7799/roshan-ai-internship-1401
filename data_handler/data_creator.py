@@ -23,7 +23,7 @@ class DataCreator():
         self.path_to_csv = path_to_metadata_csv_file
         self.dst = dst
 
-    def create_data_folder(self, in_kaggle:bool, n_classes:int = 30):
+    def create_data_folder(self, in_kaggle:bool=False, n_classes:int=30):
         
         shutil.rmtree(self.dst, ignore_errors=True)
         os.makedirs(self.dst, exist_ok=True)
@@ -40,8 +40,11 @@ class DataCreator():
 
         metadata = pd.read_csv(os.path.join(self.dst, 'ordibehesht.csv'))
         metadata.dropna(inplace=True)
-
-        image_names = os.listdir(os.path.join(self.dst, self.path_to_images_file.split('/')[-1]))
+        if in_kaggle:
+            image_names = os.listdir(os.path.join(self.dst, self.path_to_images_file.split('/')[-1]))
+        else:
+            image_names = os.listdir(os.path.join(self.dst, self.path_to_images_file.split('/')[-1].split('.')[0]))
+        
         image_names = [image_name.split('.')[0] for image_name in image_names]
 
         for image_dir, labels_list in metadata.itertuples(index=False, name=None):
@@ -59,6 +62,9 @@ class DataCreator():
 
             if len(image_names) == 0:
                 break
+        
+        # remove 'بدون گیاه' class:
+        shutil.rmtree(os.path.join(self.dst, 'dataset', 'بدون گیاه'))
 
         all_classes = os.listdir(os.path.join(self.dst, 'dataset'))
 
@@ -68,8 +74,8 @@ class DataCreator():
             len_of_class = len(os.listdir(os.path.join(self.dst, 'dataset', cls)))
             len_of_classes_dict[cls] = len_of_class
         
-        len_of_classes_dict = dict(sorted(len_of_classes_dict.items(), key=lambda item: item[1], reverse=True))
-        len_of_needed_classes_dict = dict(list(len_of_classes_dict.items())[:n_classes])
+        sorted_len_of_classes_dict = dict(sorted(len_of_classes_dict.items(), key=lambda item: item[1], reverse=True))
+        len_of_needed_classes_dict = dict(list(sorted_len_of_classes_dict.items())[:n_classes])
 
         needed_classes = list(len_of_needed_classes_dict.keys())
 
@@ -80,7 +86,7 @@ class DataCreator():
 
         print('data folder created successfully.\n')
 
-    def partitioning(self, partitioning_base_folder:str = '../dataset', val_ratio:float = 0.15, test_ratio:float = 0.15, seed:float = None):
+    def partitioning(self, partitioning_base_folder:str = '../dataset', val_ratio:float = 0.15, test_ratio:float = 0.15, seed:int = 1337):
 
         shutil.rmtree(partitioning_base_folder, ignore_errors=True)
 
@@ -96,7 +102,7 @@ class DataCreator():
         for cls, encoded_cls in zip(classes, encoded_classes):
             encoded_classes_dict[cls] = encoded_cls
 
-        splitfolders.ratio(input=os.path.join(self.dst, 'dataset'), output=partitioning_base_folder, ratio=(1-val_ratio-test_ratio, val_ratio, test_ratio), move=False, seed=seed)
+        splitfolders.ratio(input=os.path.join(self.dst, 'dataset'), output=partitioning_base_folder, ratio=(1-val_ratio-test_ratio, val_ratio, test_ratio), seed=seed)
 
         train_classes = sorted(os.listdir(os.path.join(partitioning_base_folder, 'train')))
         val_classes = sorted(os.listdir(os.path.join(partitioning_base_folder, 'val')))
