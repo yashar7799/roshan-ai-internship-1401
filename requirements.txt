@@ -1,3 +1,7 @@
+split-folders[full]
+albumentations
+mlflow>=1.20.2
+pyngrok
 pillow
 numpy
 scipy
@@ -7,8 +11,3 @@ keras
 sklearn
 seaborn
 matplotlib
-gdown
-pyngrok
-mlflow>=1.20.2
-split-folders[full]
-albumentations
