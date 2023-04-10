@@ -44,7 +44,7 @@ class Xception():
         model.add(Conv2D(3, 1, activation='relu', padding='same', input_shape=self.input_shape))
         model.add(mobile)
         model.add(Flatten())
-        model.add(Dense(128, activation='relu'))
+        model.add(Dense(128, activation='relu', kernel_regularizer='l1_l2'))
         model.add(Dropout(self.dropout))
         model.add(Dense(self.num_classes, activation='sigmoid'))
 
