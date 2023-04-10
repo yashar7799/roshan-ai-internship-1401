@@ -19,8 +19,8 @@ def main_args():
     parser.add_argument('--model', type=str, default='model1', help='model name.', required=True)
     parser.add_argument('--input_shape', type=int, nargs='+', help='desired input shape to feed the model with')
     parser.add_argument('--n_classes', type=int, default=30, help='number of classes; this should be same as the number of classes of the dataset you are using', required=True)
-    parser.add_argument('--batch_size', type=int, default=8, help='define batch size')
-    parser.add_argument('--dropout_rate', type=float, default=0.5, help='define dropout rate to use between fc layers')
+    parser.add_argument('--batch_size', type=int, default=8, help='batch size')
+    parser.add_argument('--dropout_rate', type=float, default=0.5, help='dropout rate to use between fc layers')
     parser.add_argument('--loss', type=str, default='categorical_crossentropy', help='You can pass these losses: categorical_crossentropy | kullback_leibler_divergence | huber')
     parser.add_argument('--epochs', type=int, default=5, help='define number of training epochs')
 
@@ -33,9 +33,9 @@ def main_args():
 
     parser.add_argument('--weights_base_folder', type=str, default='./weights', help='this is the base folder that all the weights will be saved there')
 
-    parser.add_argument('--path_to_images_file', type=str, default='/content/drive/MyDrive/roshan_internship_dataset_jpg.zip', help='dataset directory, this directory should contain all images in a source, like google drive folder', required=False)
-    parser.add_argument('--path_to_metadata_csv_file', type=str, default='/content/drive/MyDrive/roshan_internship_dataset_jpg.zip', help='dataset directory, this directory should contain all images in a source, like google drive folder', required=False)
-    parser.add_argument('--dataset_dir_before_split', type=str, default='/content/roshan_internship_dataset_png', help='dataset directory, this directory should contain all images before splitting', required=True)
+    parser.add_argument('--path_to_images_file', type=str, help='path to dataset, this directory should contain all images in a source, like google drive folder', required=True)
+    parser.add_argument('--path_to_metadata_csv_file', type=str, help='path to metadata csv file', required=True)
+    parser.add_argument('--dataset_dir_before_split', type=str, help='dataset directory, this directory should contain all images before splitting', required=True)
     parser.add_argument('--dataset_dir_after_split', type=str, default='../dataset', help='dataset directory, this directory should contain train, val & test folders', required=True)
 
     parser.add_argument('--mlflow_source', type=str, default='./mlruns', help='The mlflow direcotry')
