@@ -39,14 +39,19 @@ class Xception():
         else:
             weights=None
 
-        mobile = xception.Xception(input_shape= (self.input_shape[0], self.input_shape[1], self.input_shape[2]) ,  include_top=False, pooling='max', weights=weights)
+        mobile = xception.Xception(input_shape= (self.input_shape[0], self.input_shape[1], self.input_shape[2]) ,  include_top=False, pooling='max', weights=weights, classifier_activation='relu')
         model = Sequential()
-        model.add(Conv2D(3, 1, activation='relu', padding='same', input_shape=self.input_shape))
+        # model.add(Conv2D(3, 1, activation='relu', padding='same', input_shape=self.input_shape))
         model.add(mobile)
         model.add(Flatten())
-        model.add(Dense(128, activation='relu', kernel_regularizer='l1_l2'))
         model.add(Dropout(self.dropout))
-        model.add(Dense(self.num_classes, activation='sigmoid'))
+        model.add(Dense(700, activation='relu', kernel_regularizer='l1_l2'))
+        model.add(Dropout(self.dropout))
+        model.add(Dense(400, activation='relu', kernel_regularizer='l1_l2'))
+        model.add(Dropout(self.dropout))
+        model.add(Dense(100, activation='relu', kernel_regularizer='l1_l2'))
+        model.add(Dropout(self.dropout))
+        model.add(Dense(self.num_classes, activation='softmax'))
 
         if self.pre_trained:
             model.load_weights(self.model_path)
