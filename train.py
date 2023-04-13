@@ -133,6 +133,15 @@ def train():
                 loss = args.loss
 
             model.compile(optimizer=opt, loss=loss, metrics=['acc'])
+        
+        model.fit(x=train_loader,
+                batch_size=args.batch_size,
+                epochs=args.epochs,
+                validation_data=val_loader,
+                validation_batch_size=args.batch_size,
+                callbacks=callbacks,
+                use_multiprocessing=args.multiprocessing,
+                )
     else:
         if args.model == 'model1':
             model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, dropout=args.dropout_rate)
@@ -189,15 +198,15 @@ def train():
 
         model.compile(optimizer=opt, loss=loss, metrics=['acc'])
     
-    model.fit(x=train_loader,
-              batch_size=args.batch_size,
-              epochs=args.epochs,
-              validation_data=val_loader,
-              validation_batch_size=args.batch_size,
-              callbacks=callbacks,
-              use_multiprocessing=args.multiprocessing,
-              workers=args.workers,
-              )
+        model.fit(x=train_loader,
+                batch_size=args.batch_size,
+                epochs=args.epochs,
+                validation_data=val_loader,
+                validation_batch_size=args.batch_size,
+                callbacks=callbacks,
+                use_multiprocessing=args.multiprocessing,
+                workers=args.workers,
+                )
 
     print("Training Model is Done!\n")
 
