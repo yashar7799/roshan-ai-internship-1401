@@ -140,7 +140,6 @@ def train():
                 validation_data=val_loader,
                 validation_batch_size=args.batch_size,
                 callbacks=callbacks,
-                use_multiprocessing=args.multiprocessing,
                 )
     else:
         if args.model == 'model1':
