@@ -71,61 +71,124 @@ def train():
     train_loader = DataGenerator(partition['train'], labels, encoded_classes_dict, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes, augmentation=args.augmentation, augmentation_prob=args.augmentation_prob)
     val_loader = DataGenerator(partition['val'], labels, encoded_classes_dict, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes, augmentation=args.augmentation, augmentation_prob=args.augmentation_prob)
     test_loader = DataGenerator(partition['test'], labels, encoded_classes_dict, batch_size=args.batch_size, dim=(args.input_shape[0], args.input_shape[1]), n_channels=args.input_shape[2], n_classes=args.n_classes)
-    
-    if args.model == 'model1':
-        model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, dropout=args.dropout_rate)
-    elif args.model == 'resnet18':
-        model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain)
-    elif args.model in ['resnet50', 'resnet50v2', 'efficientnet_b0']:
-        model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, imagenet_weights=args.imagenet_weights)
+    if args.use_tpu:
+        # detect and init the TPU
+        tpu = tf.distribute.cluster_resolver.TPUClusterResolver.connect()
+
+        # instantiate a distribution strategy
+        tpu_strategy = tf.distribute.experimental.TPUStrategy(tpu)
+
+        with tpu_strategy.scope():
+            if args.model == 'model1':
+                model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, dropout=args.dropout_rate)
+            elif args.model == 'resnet18':
+                model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain)
+            elif args.model in ['resnet50', 'resnet50v2', 'efficientnet_b0']:
+                model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, imagenet_weights=args.imagenet_weights)
+            else:
+                model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, dropout=args.dropout_rate, imagenet_weights=args.imagenet_weights)
+
+            print("Loading Model is Done!\n")
+
+            if args.pretrain:
+                model.load_weights(args.path_to_pretrain)
+                print('pretrain weights loaded.\n')
+            model.summary()
+
+            checkpoint, warmup_lr, early_stopping, plateau_reduce_lr = get_callbacks(model_path=weight_path,
+                                                                                    early_stopping_patience=args.early_stopping_patience,
+                                                                                    #    tb_log_dir=args.tb_log_dir,
+                                                                                    epochs=args.epochs,
+                                                                                    sample_count=len(train_loader) * args.batch_size,
+                                                                                    batch_size=args.batch_size,
+                                                                                    warmup_epoch=args.warmup_epoch,
+                                                                                    warmup_max_lr=args.warmup_max_lr,
+                                                                                    #    model_name=model_name,
+                                                                                    #    n_classes=args.n_classes,
+                                                                                    plateau_reduce_min_lr=args.plateau_reduce_min_lr,
+                                                                                    plateau_reduce_factor=args.plateau_reduce_factor,
+                                                                                    plateau_reduce_patience=args.plateau_reduce_patience)
+            
+            callbacks = [checkpoint, early_stopping, mlflow_handler.mlflow_logger]
+            
+            if args.warmup_lr_scheduler:
+                callbacks.append(warmup_lr)
+                print('warmup_lr_scheduler activated.\n')
+            elif args.cosine_decay_lr_scheduler:
+                lr_scheduler = tf.keras.optimizers.schedules.CosineDecay(
+                    initial_learning_rate=args.cosine_decay_initial_lr, decay_steps=args.epochs, alpha=args.cosine_decay_alpha, name='None')
+                opt = Adam(learning_rate=lr_scheduler)
+                print('cosine_decay_lr_scheduler activated.\n')
+            elif args.plateau_reduce_lr_scheduler:
+                callbacks.append(plateau_reduce_lr)
+                opt = Adam(learning_rate=args.plateau_reduce_initial_lr)
+                print('plateau_reduce_lr_scheduler activated.\n')
+            else:
+                opt = Adam(learning_rate=args.learning_rate)
+                print(f'none of lr_schedulers  activated, learning rate fixed at: {args.learning_rate}\n')
+            
+            if args.loss == 'huber':
+                loss = tf.keras.losses.Huber()
+            else:
+                loss = args.loss
+
+            model.compile(optimizer=opt, loss=loss, metrics=['acc'])
     else:
-        model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, dropout=args.dropout_rate, imagenet_weights=args.imagenet_weights)
+        if args.model == 'model1':
+            model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, dropout=args.dropout_rate)
+        elif args.model == 'resnet18':
+            model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain)
+        elif args.model in ['resnet50', 'resnet50v2', 'efficientnet_b0']:
+            model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, imagenet_weights=args.imagenet_weights)
+        else:
+            model = load_model(args.model, input_shape=args.input_shape, num_classes=args.n_classes, pre_trained=args.pretrain, model_path=args.path_to_pretrain, dropout=args.dropout_rate, imagenet_weights=args.imagenet_weights)
 
-    print("Loading Model is Done!\n")
+        print("Loading Model is Done!\n")
 
-    if args.pretrain:
-        model.load_weights(args.path_to_pretrain)
-        print('pretrain weights loaded.\n')
-    model.summary()
+        if args.pretrain:
+            model.load_weights(args.path_to_pretrain)
+            print('pretrain weights loaded.\n')
+        model.summary()
 
-    checkpoint, warmup_lr, early_stopping, plateau_reduce_lr = get_callbacks(model_path=weight_path,
-                                                                               early_stopping_patience=args.early_stopping_patience,
-                                                                            #    tb_log_dir=args.tb_log_dir,
-                                                                               epochs=args.epochs,
-                                                                               sample_count=len(train_loader) * args.batch_size,
-                                                                               batch_size=args.batch_size,
-                                                                               warmup_epoch=args.warmup_epoch,
-                                                                               warmup_max_lr=args.warmup_max_lr,
-                                                                            #    model_name=model_name,
-                                                                            #    n_classes=args.n_classes,
-                                                                               plateau_reduce_min_lr=args.plateau_reduce_min_lr,
-                                                                               plateau_reduce_factor=args.plateau_reduce_factor,
-                                                                               plateau_reduce_patience=args.plateau_reduce_patience)
+        checkpoint, warmup_lr, early_stopping, plateau_reduce_lr = get_callbacks(model_path=weight_path,
+                                                                                early_stopping_patience=args.early_stopping_patience,
+                                                                                #    tb_log_dir=args.tb_log_dir,
+                                                                                epochs=args.epochs,
+                                                                                sample_count=len(train_loader) * args.batch_size,
+                                                                                batch_size=args.batch_size,
+                                                                                warmup_epoch=args.warmup_epoch,
+                                                                                warmup_max_lr=args.warmup_max_lr,
+                                                                                #    model_name=model_name,
+                                                                                #    n_classes=args.n_classes,
+                                                                                plateau_reduce_min_lr=args.plateau_reduce_min_lr,
+                                                                                plateau_reduce_factor=args.plateau_reduce_factor,
+                                                                                plateau_reduce_patience=args.plateau_reduce_patience)
+        
+        callbacks = [checkpoint, early_stopping, mlflow_handler.mlflow_logger]
+        
+        if args.warmup_lr_scheduler:
+            callbacks.append(warmup_lr)
+            print('warmup_lr_scheduler activated.\n')
+        elif args.cosine_decay_lr_scheduler:
+            lr_scheduler = tf.keras.optimizers.schedules.CosineDecay(
+                initial_learning_rate=args.cosine_decay_initial_lr, decay_steps=args.epochs, alpha=args.cosine_decay_alpha, name='None')
+            opt = Adam(learning_rate=lr_scheduler)
+            print('cosine_decay_lr_scheduler activated.\n')
+        elif args.plateau_reduce_lr_scheduler:
+            callbacks.append(plateau_reduce_lr)
+            opt = Adam(learning_rate=args.plateau_reduce_initial_lr)
+            print('plateau_reduce_lr_scheduler activated.\n')
+        else:
+            opt = Adam(learning_rate=args.learning_rate)
+            print(f'none of lr_schedulers  activated, learning rate fixed at: {args.learning_rate}\n')
+        
+        if args.loss == 'huber':
+            loss = tf.keras.losses.Huber()
+        else:
+            loss = args.loss
+
+        model.compile(optimizer=opt, loss=loss, metrics=['acc'])
     
-    callbacks = [checkpoint, early_stopping, mlflow_handler.mlflow_logger]
-    
-    if args.warmup_lr_scheduler:
-        callbacks.append(warmup_lr)
-        print('warmup_lr_scheduler activated.\n')
-    elif args.cosine_decay_lr_scheduler:
-        lr_scheduler = tf.keras.optimizers.schedules.CosineDecay(
-            initial_learning_rate=args.cosine_decay_initial_lr, decay_steps=args.epochs, alpha=args.cosine_decay_alpha, name='None')
-        opt = Adam(learning_rate=lr_scheduler)
-        print('cosine_decay_lr_scheduler activated.\n')
-    elif args.plateau_reduce_lr_scheduler:
-        callbacks.append(plateau_reduce_lr)
-        opt = Adam(learning_rate=args.plateau_reduce_initial_lr)
-        print('plateau_reduce_lr_scheduler activated.\n')
-    else:
-        opt = Adam(learning_rate=args.learning_rate)
-        print(f'none of lr_schedulers  activated, learning rate fixed at: {args.learning_rate}\n')
-    
-    if args.loss == 'huber':
-        loss = tf.keras.losses.Huber()
-    else:
-        loss = args.loss
-
-    model.compile(optimizer=opt, loss=loss, metrics=['acc'])
     model.fit(x=train_loader,
               batch_size=args.batch_size,
               epochs=args.epochs,

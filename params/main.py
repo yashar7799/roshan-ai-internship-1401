@@ -23,6 +23,7 @@ def main_args():
     parser.add_argument('--dropout_rate', type=float, default=0.5, help='dropout rate to use between fc layers')
     parser.add_argument('--loss', type=str, default='categorical_crossentropy', help='You can pass these losses: categorical_crossentropy | kullback_leibler_divergence | huber')
     parser.add_argument('--epochs', type=int, default=5, help='define number of training epochs')
+    parser.add_argument('--use_tpu', dest='use_tpu', action='store_true', help='pass this arg if you want to train model with a TPU hardware.')
 
     parser.add_argument('--val_ratio', type=float, default=0.15, help='validation ratio to be devided from dataset')
     parser.add_argument('--test_ratio', type=float, default=0.15, help='test ratio to be devided from dataset')
